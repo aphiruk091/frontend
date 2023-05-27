@@ -5,6 +5,10 @@ import { Link } from "react-router-dom";
 
 const ShoppingCard = () => {
   const [show, setShow] = useState([]);
+  const [id, setId] = useState(0);
+  const [product, setProduct] = useState("");
+  const [inventory, setInventory] = useState(0);
+ 
 
   async function Order() {
     try {
@@ -35,6 +39,7 @@ const ShoppingCard = () => {
       alert(err);
     }
   };
+
   const handleCheckout = async () => {
     try {
       const confirmDelete = window.confirm(
@@ -43,8 +48,11 @@ const ShoppingCard = () => {
       if (confirmDelete) {
         await Promise.all(
           show.map(function fn(ord) {
+
             const { id, order_id, product_id, qty } = ord;
-            const { price,inventory=5 } = ord.product;
+            const { price,inventory} = ord.product;
+            Get_stock(product_id);
+
            axios.put(`https://localhost:7291/Api/Order/${id}`, {
               id,
               order_id,
@@ -52,7 +60,7 @@ const ShoppingCard = () => {
               qty,
               status: "Y",
             });
-
+           
 
           })
         );
@@ -63,7 +71,19 @@ const ShoppingCard = () => {
       alert(err);
     }
   };
-
+async function Get_stock(product_id) {
+    try {
+        
+      const result = await axios.get(`https://localhost:7291/Api/Stock/${product_id}`
+      );
+      setId(result.data.id);
+      setProduct(result.data.product_id);
+      setInventory(result.data.inventory);
+      console.log(result.data);
+    } catch (err) {
+      alert(err);
+    }
+  }
   return (
     <>
       <div className="container">
