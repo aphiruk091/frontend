@@ -6,10 +6,6 @@ import { Link } from "react-router-dom";
 const ShoppingCard = () => {
   const [show, setShow] = useState([]);
   const [id, setId] = useState(0);
-  const [product, setProduct] = useState("");
-  const [inventory, setInventory] = useState(0);
- 
-
   async function Order() {
     try {
       const result = await axios.get(
@@ -24,7 +20,6 @@ const ShoppingCard = () => {
 
   useEffect(() => {
     Order();
-    
   }, []);
 
   const handleDelete = async (id) => {
@@ -40,65 +35,90 @@ const ShoppingCard = () => {
     }
   };
 
-  const handleCheckout = async () => {
+  const handleClear = async () => {
     try {
       const confirmDelete = window.confirm(
-        "Are you sure you want to Check Out Order ?"
+        "Are you sure you want to Clear Order all?"
       );
       if (confirmDelete) {
         await Promise.all(
           show.map(function fn(ord) {
-
-            const { id, order_id, product_id, qty } = ord;
-            const { price,inventory} = ord.product;
-            Get_stock(product_id);
-
-           axios.put(`https://localhost:7291/Api/Order/${id}`, {
-              id,
-              order_id,
-              product_id,
-              qty,
-              status: "Y",
-            });
-           
-
+            const { id } = ord;
+            axios.delete(`https://localhost:7291/Api/Order/${id}`);
           })
         );
-        alert("Check Out Order successfully ");
+        alert("Clear Order successfully ");
         Order();
       }
     } catch (err) {
       alert(err);
     }
   };
-async function Get_stock(product_id) {
+  const handleCheckout = async () => {
     try {
-        
-      const result = await axios.get(`https://localhost:7291/Api/Stock/${product_id}`
+      const confirmDelete = window.confirm(
+        "Are you sure you want to Check Out Order ?"
       );
-      setId(result.data.id);
-      setProduct(result.data.product_id);
-      setInventory(result.data.inventory);
-      console.log(result.data);
+      let sumAmount = 0;
+      if (confirmDelete) {
+        await Promise.all(
+          show.map(function fn(ord) {
+            const { id, order_id, product_id, qty } = ord;
+            const { price } = ord.product;
+            const sum = price * qty;
+            sumAmount += sum;
+            axios.put(`https://localhost:7291/Api/Order/${id}`, {
+              id,
+              order_id,
+              product_id,
+              qty,
+              status: "Y",
+            });
+          })
+        );
+        alert("Check Out Order ต้องชำระยอดทั้งหมด " + sumAmount + " บาท");
+        Order();
+      }
     } catch (err) {
       alert(err);
     }
-  }
+  };
   return (
     <>
       <div className="container">
         <div className="row py-5">
           <h4 className="mt-1">Shopping Card</h4>
-          <div className="col-md-10"></div>
+          <div className="col-md-8"></div>
           <div className="col-md-2">
             <Link
-              className="btn btn-danger position-relative"
+              className="btn btn-info position-relative"
               onClick={() => handleCheckout()}
               relative="path"
             >
               Check Out
             </Link>
           </div>
+          <div className="col-md-2">
+            <Link
+              className="btn btn-danger position-relative"
+              onClick={() => handleClear()}
+              relative="path"
+            >
+              ล้างรายการทั้งหมด
+            </Link>
+          </div>
+          <input
+            type="text"
+            readOnly
+            style={{ display: "none" }}
+            value={id}
+            onChange={(e) => {
+              setId(e.target.value);
+            }}
+            class="form-control"
+            id="id"
+            placeholder="id"
+          ></input>
           <div className="col-md-12">
             <div className="card bg-light mt-3">
               <div className="col-md-12 py-3">

@@ -17,7 +17,7 @@ const Shopping = () => {
       alert(err);
     }
   }
-  
+
   useEffect(() => {
     Show_detail();
   }, []);
@@ -33,7 +33,7 @@ const Shopping = () => {
     } catch (err) {
       alert(err);
     }
-  }
+  };
   return (
     <>
       <div className="container">
@@ -71,10 +71,17 @@ const Shopping = () => {
                           <td>{prd.product_Name}</td>
                           <td>{prd.price}</td>
                           <td>{prd.stock.inventory}</td>
+
                           <td>
-                            <button type="button" onClick={() => handleAddOrder(prd.product_id)} class="btn btn-success">
-                              Buy
-                            </button>
+                            {prd.stock.inventory > 0 ? (
+                              <button
+                                type="button"
+                                onClick={() => handleAddOrder(prd.product_id)}
+                                className="btn btn-success"
+                              >
+                                Buy
+                              </button>
+                            ) : <label>สินค้าหมด</label>}
                           </td>
                           <td></td>
                         </tr>
